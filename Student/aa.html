@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bar Chart</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+  <canvas id="chart"></canvas>
+
+  <script>
+    function setUpChart() {
+      apiFetchAllMarks();
+    }
+
+    setUpChart();
+
+    function populateActualData(marks) {
+      const studentNames = [];
+      const marksData = [];
+
+      for (const mark of marks) {
+        const { id, name, marks } = mark;
+        studentNames.push(name);
+        marksData.push(marks);
+      }
+
+      createBarChart(studentNames, marksData);
+    }
+
+    function apiFetchAllMarks() {
+      axios
+        .get('http://localhost:8080/mark/')
+        .then(function (response) {
+          const { data } = response;
+          const { sts, msg, bd } = data;
+          populateActualData(bd);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    }
+
+    function createBarChart(studentNames, marksData) {
+      const chartCanvas = document.getElementById('chart').getContext('2d');
+
+      if (!Array.isArray(marksData)) {
+        console.error('Invalid marks data. Expected an array.');
+        return;
+      }
+
+      new Chart(chartCanvas, {
+        type: 'bar',
+        data: {
+          labels: studentNames,
+          datasets: [
+            {
+              label: 'Marks',
+              data: marksData,
+              backgroundColor: 'rgba(75, 192, 192, 0.2)',
+              borderColor: 'rgba(75, 192, 192, 1)',
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: {
+          aspectRatio: 2.5, // Adjust the width-to-height ratio of the chart
+          scales: {
+            x: {
+              barPercentage: 0.2, // Adjust the width of the bars
+              categoryPercentage: 0.1, // Adjust the spacing between bars
+              title: {
+                display: true,
+                text: 'Student Name',
+              },
+            },
+            y: {
+              title: {
+                display: true,
+                text: 'Marks',
+              },
+              beginAtZero: true,
+              max: 100, // Set the maximum value of the y-axis to 100
+            },
+          },
+        },
+      });
+    }
+  </script>
+</body>
+
+</html>
+

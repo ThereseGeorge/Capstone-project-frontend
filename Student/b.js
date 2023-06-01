@@ -1,0 +1,2 @@
+const studentNames = [];
+const marksData = [];
